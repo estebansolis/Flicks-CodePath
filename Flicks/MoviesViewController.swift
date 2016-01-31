@@ -8,19 +8,43 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate
 {
 
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var networkLabel: UILabel!
+    
+    @IBOutlet weak var movieSearch: UISearchBar!
+    
     var movies: [NSDictionary]?
+    var refreshControl : UIRefreshControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.dataSource = self
         tableView.delegate = self
+        tableView.dataSource = self
         
+        refreshControl = UIRefreshControl()
+        networkLabel.hidden = true
+        refreshControl.addTarget(self, action: "onPullRefresh", forControlEvents: UIControlEvents.ValueChanged)
+        tableView.insertSubview(refreshControl, atIndex: 0)
+        loadDataFromNetwork()
+    
+       
+        movieSearch.hidden = true
+        
+    }
+  
+    
+    func loadDataFromNetwork(){
+        if Reachability.isConnectedToNetwork() == true {
+            networkLabel.hidden = true;
+        } else {
+            networkLabel.hidden = false;
+        }
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
         let request = NSURLRequest(
@@ -34,20 +58,31 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             delegateQueue: NSOperationQueue.mainQueue()
         )
         
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        
         let task: NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
                 if let data = dataOrNil {
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
-                            print("response: \(responseDictionary)")
                             
-                            self.movies = responseDictionary["results"] as! [NSDictionary]
+                            print("response: \(responseDictionary)")
+                            self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.tableView.reloadData()
+                            self.refreshControl.endRefreshing()
+                            
                     }
                 }
+                MBProgressHUD.hideHUDForView(self.view, animated: true)
         })
         task.resume()
-        // Do any additional setup after loading the view.
+    }
+    
+    func onPullRefresh() {
+        
+        movieSearch.hidden = false
+        self.loadDataFromNetwork()
+        
     }
 
     override func didReceiveMemoryWarning() {
