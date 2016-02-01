@@ -17,7 +17,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     @IBOutlet weak var networkLabel: UILabel!
     
-    @IBOutlet weak var movieSearch: UISearchBar!
+ 
     
     var movies: [NSDictionary]?
     var refreshControl : UIRefreshControl!
@@ -33,8 +33,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.insertSubview(refreshControl, atIndex: 0)
         loadDataFromNetwork()
     
-       
-        movieSearch.hidden = true
+      
         
     }
   
@@ -80,7 +79,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func onPullRefresh() {
         
-        movieSearch.hidden = false
+     
         self.loadDataFromNetwork()
         
     }
@@ -106,16 +105,15 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        let posterPath = movie["poster_path"] as! String
-        
+        cell.titleLabel.text = title
+        cell.overView.text = overview
         let baseUrl = "http://image.tmdb.org/t/p/w500"
-        
+        if let posterPath = movie["poster_path"] as? String{
         
         let imageUrl = NSURL(string: baseUrl + posterPath)
         
         cell.posterView.setImageWithURL(imageUrl!)
-        cell.titleLabel.text = title
-        cell.overView.text = overview
+        }
         
         
         
@@ -125,14 +123,20 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
 
-    /*
+  
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        let cell = sender as! UITableViewCell
+        let indexPath = tableView.indexPathForCell(cell)
+        let movie = movies![indexPath!.row]
+        
+        let detailViewController = segue.destinationViewController as! DetailViewController
+        detailViewController.movie = movie
     }
-    */
+
 
 }
