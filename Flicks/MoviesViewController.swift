@@ -22,6 +22,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     var movies: [NSDictionary]?
     var refreshControl : UIRefreshControl!
     
+    var endpoint: String!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
@@ -45,7 +47,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             networkLabel.hidden = false;
         }
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(
             URL: url!,
             cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringLocalCacheData,
@@ -114,11 +116,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         cell.posterView.setImageWithURL(imageUrl!)
         }
-        
-        
-        
-        
-       // print("row\(indexPath.row)")
+
         return cell
     }
     
@@ -130,7 +128,12 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.whiteColor()
+        
         let cell = sender as! UITableViewCell
+        cell.selectedBackgroundView = backgroundView
+        //cell.selectionStyle = .Gray
         let indexPath = tableView.indexPathForCell(cell)
         let movie = movies![indexPath!.row]
         
